@@ -34,6 +34,7 @@ function validateInputs(data) {
 }
 
 router.post('/', (req, res) => {
+    console.log(req.body);
     const {errors, isValid} = validateInputs(req.body)
     console.log(errors);
     if (!isValid) {

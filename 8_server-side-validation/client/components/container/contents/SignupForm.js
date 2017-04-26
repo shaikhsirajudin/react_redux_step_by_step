@@ -3,6 +3,10 @@ import timezones from '../../../data/timezone';
 import {map} from 'lodash';
 import axios from 'axios';
 import propTypes from 'prop-types';
+// Import the classnames to added conditional css class feature
+// <div className="form-group"> inplace of this
+// <div className={classnames("form-group",{"has-error":errors.username})}>
+import classnames from 'classnames';
 
 class SignupForm extends Component {
     // In es6 we define state in the class constructor like below
@@ -16,8 +20,9 @@ class SignupForm extends Component {
             email: '',
             password: '',
             passwordConfirmation: '',
-            timezone: ''
-
+            timezone: '',
+            errors: {},
+            isLoading:false
         };
         // There are two ways we can bind in the constructor or in the control like this
         // <input type="text" name="username" value={this.state.username}
@@ -38,7 +43,10 @@ class SignupForm extends Component {
 
     onSubmit(e)
     {
+
         e.preventDefault();
+        // clear the error every time when we submit the form.
+        this.setState({errors: {},isLoading:true});
         /*Inplace of making actual ajax call we will define props function and call it. */
         //axios.post('/api/users',{users:this.state});
         /* call the props function and pass the state to it */
@@ -48,11 +56,11 @@ class SignupForm extends Component {
             .then((response) => {
                 console.log('success')
                 console.log(response);
-            }, ({data}) => {
-                console.log("data");
-                 console.log(data);
-                this.setState({errors:data});
-               
+            }, (err) => {
+                console.log("error");
+                console.log(err.response);
+                this.setState({errors: err.response.data, isLoading: false});
+
             })
         /* .catch((error) => {
                 if (error.response) {
@@ -76,13 +84,11 @@ class SignupForm extends Component {
 
             });*/
 
-        //  .then(       (data)=>this.setState({errors:data})
-        // ).else(({data})=>this.setState({errors:data})); console.log(this.state) now
-        // we can use promies
-
     }
     render()
     {
+        // grab the error in the constant
+        const {errors} = this.state;
         const options = map(timezones, (val) => <option key={val.value} value={val.text}>{val.text}</option>
         );
         return (
@@ -92,7 +98,7 @@ class SignupForm extends Component {
                 <h1>
                     Join our community
                 </h1>
-                <div className="form-group">
+                <div className={classnames("form-group",{"has-error":errors.username})}>
                     <label className="control-label">
                         User Name
                     </label>
@@ -105,7 +111,8 @@ class SignupForm extends Component {
                         .bind(this)}
                         className="form-control"/>
                 </div>
-                <div className="form-group">
+                {(errors.username) && <span className="help-block">{errors.email}</span>}
+                <div className={classnames("form-group",{"has-error":errors.username})}>
                     <label className="control-label">
                         Email
                     </label>
@@ -116,9 +123,9 @@ class SignupForm extends Component {
                         onChange={this
                         .onChange
                         .bind(this)}
-                        className="form-control"/>
+                        className="form-control"/> {(errors.email) && <span className="help-block">{errors.email}</span>}
                 </div>
-                <div className="form-group">
+               <div className={classnames("form-group",{"has-error":errors.password})}>
                     <label className="control-label">
                         Password
                     </label>
@@ -129,9 +136,9 @@ class SignupForm extends Component {
                         onChange={this
                         .onChange
                         .bind(this)}
-                        className="form-control"/>
+                        className="form-control"/> {(errors.password) && <span className="help-block">{errors.password}</span>}
                 </div>
-                <div className="form-group">
+                <div className={classnames("form-group",{"has-error":errors.passwordConfirmation})}>
                     <label className="control-label">
                         Password Confirmation
                     </label>
@@ -142,9 +149,9 @@ class SignupForm extends Component {
                         onChange={this
                         .onChange
                         .bind(this)}
-                        className="form-control"/>
+                        className="form-control"/> {(errors.passwordConfirmation) && <span className="help-block">{errors.passwordConfirmation}</span>}
                 </div>
-                <div className="form-group">
+                <div className={classnames("form-group",{"has-error":errors.timezone})}>
                     <label className="control-label">
                         Timezone
                     </label>
@@ -158,9 +165,10 @@ class SignupForm extends Component {
                         <option value="" disabled>Choose your timezone</option>
                         {options}
                     </select>
+                    {(errors.timezone) && <span className="help-block">{errors.timezone}</span>}
                 </div>
                 <div className="from-group">
-                    <button
+                    <button disabled={this.state.isLoading}
                         type="submit"
                         onClick={this
                         .onSubmit
